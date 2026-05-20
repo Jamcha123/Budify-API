@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+body, nav, #bar{
+    background-color: rgb(15, 15, 15);
+}
+
+.nav_items, button{
+    background-color: transparent;
+    transition: all 0.5s;
+}
+
+.nav_items:hover, button:hover{
+    background-color: rgb(10, 10, 10);
+}
+
+#backgroundCover{
+    background-color: rgb(20, 20, 20);
+}
+
+.docs{
+    background-color: rgb(25, 25, 25);
+}
+
+.nav_items:hover{
+    scale: 1.1;
+}
+
+.nav_items:active{
+    scale: 0.9;
+}
+
+input, #response_output{
+    background-color: rgb(15, 15, 15);
+}
+
+h1, input, button, p, li, a, li a{
+    font-family: "Raleway", sans-serif;
+}
+
+main::-webkit-scrollbar, #playground_title::-webkit-scrollbar{
+    width: 5px;
+}
+
+#playground_title::-webkit-scrollbar, pre::-webkit-scrollbar{
+    width: 2px;
+}
+
+main::-webkit-scrollbar-thumb, #playground_title::-webkit-scrollbar-thumb, pre::-webkit-scrollbar-thumb{
+    background-color: rgb(150, 150, 150);
+}
+
+@import "tailwindcss"
