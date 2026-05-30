@@ -15,7 +15,7 @@ Budify API is for price discovery for your budget and finding prices for your bu
 
 Curl Option: 
 
-```curl  --header "Authorization: <yourApikey>" https://pro-budify-2223hqzj3q-uc.a.run.app?q=rent&city=new%20york%20city&housemates=2```
+```curl  --header "Authorization: <yourApikey>" "https://pro-budify-2223hqzj3q-uc.a.run.app?q=rent&city=new%20york%20city&housemates=2"```
 
 
 ***Budify Pricing***

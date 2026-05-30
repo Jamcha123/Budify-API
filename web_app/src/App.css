@@ -1,18 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
-body, nav, #bar{
+body, nav, .bar{
+    background-color: rgb(20, 20, 20);
+}
+
+main{
     background-color: rgb(15, 15, 15);
 }
 
-.nav_items, button{
-    background-color: transparent;
+.nav_items, button, .subscribe_checkout, .dels{
+    background-color: rgb(30, 30, 30);
     transition: all 0.5s;
 }
 
-.nav_items:hover, button:hover{
-    background-color: rgb(10, 10, 10);
+.nav_items:hover, button:hover, .subscribe_checkout:hover, .dels:hover{
+    background-color: rgb(25, 25, 25);
 }
 
-#backgroundCover{
+.subscribe{
     background-color: rgb(20, 20, 20);
 }
 
@@ -29,7 +33,11 @@ body, nav, #bar{
 }
 
 input, #response_output{
-    background-color: rgb(15, 15, 15);
+    background-color: rgb(20, 20, 20);
+}
+
+input{
+    background-color: rgb(30, 30, 30);
 }
 
 h1, input, button, p, li, a, li a{
@@ -40,12 +48,16 @@ main::-webkit-scrollbar, #playground_title::-webkit-scrollbar{
     width: 5px;
 }
 
-#playground_title::-webkit-scrollbar, pre::-webkit-scrollbar{
+#playground_title::-webkit-scrollbar, #budify_billing::-webkit-scrollbar, form::-webkit-scrollbar, pre::-webkit-scrollbar, #play_form::-webkit-scrollbar{
     width: 2px;
 }
 
-main::-webkit-scrollbar-thumb, #playground_title::-webkit-scrollbar-thumb, pre::-webkit-scrollbar-thumb{
+main::-webkit-scrollbar-thumb, form::-webkit-scrollbar-thumb, #playground_title::-webkit-scrollbar-thumb, pre::-webkit-scrollbar-thumb, #play_form::-webkit-scrollbar-thumb, #budify_billing::-webkit-scrollbar-thumb{
     background-color: rgb(150, 150, 150);
+}
+
+#submit{
+    background-color: rgb(45, 45, 45);
 }
 
 @import "tailwindcss"
