@@ -7,6 +7,10 @@ main{
     background-color: rgb(15, 15, 15);
 }
 
+#snippets{
+    background-color: rgb(25, 25, 25);
+}
+
 .nav_items, button, .subscribe_checkout, .dels{
     background-color: rgb(30, 30, 30);
     transition: all 0.5s;

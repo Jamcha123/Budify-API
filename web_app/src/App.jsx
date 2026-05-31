@@ -130,6 +130,47 @@ export default function App(){
     } else {
       document.addEventListener("DOMContentLoaded", get_user_keys);
     }
+
+    const adding = document.getElementById("adding")
+    const git_key = document.getElementById("git_key")
+    const google_key = document.getElementById("google_key")
+    const subscribe_key = document.getElementById("subscribe_key")
+
+    onAuthStateChanged(auth, async (user) => {
+      if(user.isAnonymous === true){
+        git_key.style.display = "flex"
+        google_key.style.display = "flex"
+        adding.style.display = "none"
+        subscribe_key.style.display = "none"
+      }else{
+        git_key.style.display = "none"
+        google_key.style.display = "none"
+
+        const customer_data = new Promise(async (resolve) => {
+          try{
+            const customer_id = (await getDoc(doc(db, "/customers/" + user.uid))).get("data")
+            resolve(customer_id)
+          } catch (err) {
+            resolve(undefined)
+          }
+        })
+        const customer = await customer_data
+
+        if(customer == undefined){
+          subscribe_key.style.display = "flex"
+          adding.style.display = "none"
+          return 
+        }
+
+        if(customer["active"] == undefined){
+          subscribe_key.style.display = "none"
+          adding.style.display = "flex"
+        }else{
+          subscribe_key.style.display = "flex"
+          adding.style.display = "none"
+        }
+      }
+    })
     window.addEventListener("resize", (ev) => {
       if(window.innerWidth >= 1024){
         (() => {setActive(false)})()
@@ -160,9 +201,21 @@ export default function App(){
         login_subscription.style.display = "none"
         subscription.style.display = "flex"
 
-        const customer = (await getDoc(doc(db, "customers/" + auth.currentUser.uid))).get("data")
+        const customer_data = new Promise(async (resolve) => {
+          try{
+            const customer_id = (await getDoc(doc(db, "/customers/" + user.uid))).get("data")
+            resolve(customer_id)
+          } catch (err) {
+            resolve(undefined)
+          }
+        })
+        const customer = await customer_data
 
-        if(customer["active"] === false){
+        if(customer == undefined){
+          return 
+        }
+        
+        if(customer["active"] === true){
           budify_billing.style.display = "none"
           subscription.style.display = "flex"
         }else{
@@ -171,7 +224,16 @@ export default function App(){
 
           const customer_data = document.getElementsByClassName("customer_data")
 
-          const client_info = (await axios.get("https://check-customer-data-2223hqzj3q-uc.a.run.app?user=" + auth.currentUser.uid))["data"]
+          const client_data = new Promise(async (resolve) => {
+            try{
+              const client_info = (await axios.get("https://check-customer-data-2223hqzj3q-uc.a.run.app?user=" + auth.currentUser.uid))["data"]
+              resolve(client_info)
+            } catch (err) {
+              resolve(0)
+            }
+          })
+
+          const client_info = await client_data
           
           const total_usage = document.getElementsByClassName("total_usage")
           total_usage[0].textContent = "Total Weekly Usage: $" + ((client_info["usage"]["data"][0]["aggregated_value"] * 0.10).toFixed(2)).toString()
@@ -214,7 +276,7 @@ export default function App(){
     const address = customer_data[6].value
 
 
-    const update_link = (await axios.post("http://localhost:5001/budify-430f1/us-central1/update_customer", {"email": email, "name": name, "phone": phone, "city": city, "postal_code": postal_code, "country": country, "address": address}, {headers: {Authorization: auth.currentUser.uid}}))["data"]
+    const update_link = (await axios.post("https://update-customer-2223hqzj3q-uc.a.run.app", {"email": email, "name": name, "phone": phone, "city": city, "postal_code": postal_code, "country": country, "address": address}, {headers: {Authorization: auth.currentUser.uid}}))["data"]
 
     console.log(update_link)
     alert(name + " details updated")
@@ -279,14 +341,15 @@ export default function App(){
         <div className="relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-0 mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
         </div>
         <div className="subscribe relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-0 mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
-
+        </div>
+        <div className="subscribe relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-0 mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
         </div>
         <div className="logoff relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-0 mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
-          <li className="dels text-red-500 text-xl border-white border border-dashed relative hover:scale-[1.1] active:scale-[0.9] transition-all duration-300 rounded-xl shadow-black shadow-xs w-full h-[85%] m-auto p-0 flex flex-col align-middle justify-center" onClick={(e) => {e.preventDefault(); deleteUser(auth.currentUser).then((value) => window.location.reload()).catch((err) => {if(err.code == "auth/requires-recent-login"){reauthUser(auth.currentUser.providerData[0].providerId)}})}} >
+          <li className="dels text-white bg-linear-45 from-red-950 via-red-900 to-red-800 text-xl relative hover:scale-[1.1] active:scale-[0.9] transition-all duration-300 rounded-xl shadow-black shadow-xs w-full h-[85%] m-auto p-0 flex flex-col align-middle justify-center" onClick={(e) => {e.preventDefault(); deleteUser(auth.currentUser).then((value) => window.location.reload()).catch((err) => {if(err.code == "auth/requires-recent-login"){reauthUser(auth.currentUser.providerData[0].providerId)}})}} >
             Delete Account
           </li>
         </div>
-        <div className="google_login relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-0 mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
+        <div className="google_login relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-[9vh] mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
           <li className="text-white text-xl relative rounded-xl shadow-gray-800 shadow-xs w-full h-[85%] m-auto p-0 bg-black hover:scale-[1.1] active:scale-[0.9] transition-all duration-300 flex flex-col align-middle justify-center" onClick={(e) => {e.preventDefault(); linkWithPopup(auth.currentUser, google).then((value) => window.location.reload()).catch((err) => alert(err))}} >
             Google Login
           </li>
@@ -312,11 +375,10 @@ export default function App(){
         </div>
         <div className="relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-0 mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
         </div>
-        <div className="subscribe relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-0 mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
-
+        <div className="relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-0 mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
         </div>
-        <div className="logoff relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-0 mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
-          <li className="dels border-white border border-dashed text-red-500 text-xl relative hover:scale-[1.1] active:scale-[0.9] transition-all duration-300 rounded-xl shadow-black shadow-xs w-full h-[85%] m-auto p-0 flex flex-col align-middle justify-center" onClick={(e) => {e.preventDefault(); deleteUser(auth.currentUser).then((value) => window.location.reload())}} >
+        <div className="logoff relative w-[90%] min-h-[9vh] h-[9vh] m-auto mt-[9vh] mb-0 p-0 flex flex-col align-middle justify-center text-xl text-center cursor-pointer">
+          <li className="dels bg-linear-60 from-red-950 via-red-900 to-red-900 text-white text-xl relative hover:scale-[1.1] active:scale-[0.9] transition-all duration-300 rounded-xl shadow-black shadow-xs w-full h-[85%] m-auto p-0 flex flex-col align-middle justify-center" onClick={(e) => {e.preventDefault(); deleteUser(auth.currentUser).then((value) => window.location.reload())}} >
             Delete Account
           </li>
         </div>
@@ -391,26 +453,45 @@ export default function App(){
         </main>
         <main id="api_docs" className="relative rounded-tl-2xl z-99 w-full h-screen max-h-screen min-h-screen m-auto mt-[14vh] mb-0 p-0 rounded-t-2xl flex flex-col align-middle overflow-y-auto overflow-x-hidden ">
           <div className="relative w-[90%] min-h-[15vh] h-[15vh] m-auto mt-[3%] mb-0 p-0 bg-transparent flex flex-col align-middle justify-center text-center ">
-            <h1 className="text-4xl font-light text-white flex flex-row align-middle justify-start text-start relative w-[90%] h-fit m-auto p-0 ">
+            <h1 className="text-4xl font-light text-white flex flex-row align-middle justify-start text-start relative w-full h-fit m-auto p-0 ">
               <strong>Budify Docs</strong>
             </h1>
-            <p className="text-xl text-gray-300 flex flex-row align-middle justify-start text-start relative w-[90%] h-fit m-auto p-0  ">
+            <p className="text-xl text-gray-300 flex flex-row align-middle justify-start text-start relative w-full h-fit m-auto p-0  ">
               Get Started With The Budify API
             </p>
           </div>
           <div className="relative w-[90%] min-h-[20vh] h-[20vh] m-auto mt-[4%] mb-0 p-0 bg-transparent flex flex-col align-middle justify-center text-center ">
-            <h1 className="text-3xl text-white font-light flex flex-row align-middle justify-start text-start relative w-[90%] h-fit m-auto p-0 ">
+            <h1 className="text-3xl text-white font-light flex flex-row align-middle justify-start text-start relative w-full h-fit m-auto p-0 ">
               <strong>Introduction</strong>
             </h1> <br />
-            <p className="text-xl text-gray-300 flex flex-row align-middle justify-start text-start relative w-[90%] h-fit m-auto p-0  ">
-
+            <p className="text-xl text-gray-300 flex flex-row align-middle justify-start text-start relative w-full h-fit m-auto p-0  ">
+              Budify For Price Discovery In Different Cities <br />
+              Budify Is A AI Powered Search App That Specializes In Finding Prices <br />
+              Budify Response With A Summary, High, Low, Median And Average Prices 
             </p>
           </div>
+          <div className="relative w-[90%] min-h-[35vh] h-[35vh] m-auto mt-[4%] mb-0 p-0 bg-transparent flex flex-col align-middle">
+            <h1 className="text-3xl text-white font-light flex flex-row align-middle justify-start text-start relative w-full h-[20%] m-auto p-0 ">
+              <strong>Initialize Budify</strong>
+            </h1><br />
+            <div id="snippets" className="text-xl text-gray-300 flex flex-col align-middle justify-start text-start relative w-full h-[80%] m-auto p-0  ">
+              <div className="flex flex-row align-middle justify-start text-start relative w-full h-[30%] m-auto p-0">
+                <select name="" id="" className="relative w-[10em] h-[75%] m-auto ml-0 mr-0 p-0 bg-transparent flex flex-row align-middle justify-center text-center font-light text-white text-xl ">
+                  <option className="relative w-fit h-fit m-auto p-0 bg-transparent flex flex-row align-middle justify-center text-center font-light text-white text-xl " value="curl">cURL</option>
+                </select>
+              </div>
+              <div className="flex flex-col align-middle justify-start text-start relative w-[90%] h-[70%] m-auto p-0 overflow-x-auto ">
+                <code className="relative w-full h-[85%] m-auto ml-0 mr-0 p-0 bg-transparent flex flex-row align-middle justify-start text-start font-light text-white text-xl overflow-x-auto ">
+                  curl -H "Authorization: --Your-Apikey-- " "https://pro-budify-2223hqzj3q-uc.a.run.app?q=rent&city=london&housemates=1" 
+                </code>
+              </div>
+            </div>
+          </div>
           <div className="relative w-[90%] min-h-[40vh] h-[40vh] m-auto mt-[4%] mb-0 p-0 bg-transparent flex flex-col align-middle ">
-            <h1 className="text-3xl text-white font-light flex flex-row align-middle justify-start text-start relative w-[90%] h-fit m-auto mt-0 mb-0 p-0 ">
+            <h1 className="text-3xl text-white font-light flex flex-row align-middle justify-start text-start relative w-full h-fit m-auto mt-0 mb-0 p-0 ">
               <strong>Use Cases</strong>
             </h1>
-            <p className="text-2xl text-gray-300 flex flex-col align-middle justify-start text-start font-medium relative w-[90%] h-fit m-auto mt-[1%] mb-0 p-0 ">
+            <p className="text-2xl text-gray-300 flex flex-col align-middle justify-start text-start font-medium relative w-full h-fit m-auto mt-[1%] mb-0 p-0 ">
               <li className="text-xl text-gray-300 flex flex-row align-middle justify-start text-start font-medium relative w-full h-fit m-auto p-0 ">
                 Develop Apps That Require Price Discovery <br /> E.g Apps That Need Easy To Use Cost Of Living Data And Price Data 
               </li> <br />
@@ -431,9 +512,18 @@ export default function App(){
             <h1 className="text-4xl text-white font-light flex flex-row align-middle justify-start text-start relative w-[90%] h-fit m-auto p-0 ">
               <strong>Budify API Keys</strong>
             </h1>
-            <h1 className="text-4xl text-white font-light flex flex-row align-middle justify-start text-start relative w-[90%] h-[3em] m-auto p-0 ">
-              <motion.button onClick={(e) => {e.preventDefault(); Add_User_Key()}} initial={{scale: 1}} whileHover={{scale: 1.1}} whileTap={{scale: 0.9}} transition={{type: "spring", duration: 1}} className="relative w-[10em] h-[53%] m-auto ml-0 mr-0 p-0 bg-linear-45 from-violet-950 via-violet-900 to-violet-800 text-xl font-medium rounded-xl shadow-black shadow-xs cursor-pointer ">
+            <h1 className="text-4xl text-white font-light flex flex-row align-middle justify-start text-start relative w-[90%] h-[3em] m-auto p-0 gap-4 ">
+              <motion.button id="adding" onClick={(e) => {e.preventDefault(); Add_User_Key()}} initial={{scale: 1}} whileHover={{scale: 1.1}} whileTap={{scale: 0.9}} transition={{type: "spring", duration: 1}} className="relative w-[10em] h-[50%] m-auto ml-0 mr-0 p-0 bg-linear-45 from-violet-950 via-violet-900 to-violet-800 text-xl font-medium rounded-xl shadow-black shadow-xs cursor-pointer flex flex-col align-middle justify-center ">
                 + Add API Key
+              </motion.button>
+              <motion.button id="git_key" onClick={(e) => {e.preventDefault(); linkWithPopup(auth.currentUser, github).then((value) => {window.location.reload()})}} initial={{scale: 1}} whileHover={{scale: 1.1}} whileTap={{scale: 0.9}} transition={{type: "spring", duration: 1}} className="relative w-[10em] h-[50%] m-auto ml-0 mr-0 p-0 bg-linear-45 from-violet-950 via-violet-900 to-violet-800 text-xl font-medium rounded-xl shadow-black shadow-xs cursor-pointer flex flex-col align-middle justify-center">
+                + Github Login
+              </motion.button>
+              <motion.button id="google_key" onClick={(e) => {e.preventDefault(); linkWithPopup(auth.currentUser, google).then((value) => {window.location.reload()})}} initial={{scale: 1}} whileHover={{scale: 1.1}} whileTap={{scale: 0.9}} transition={{type: "spring", duration: 1}} className="relative w-[10em] h-[50%] m-auto ml-0 mr-0 p-0 bg-linear-45 from-violet-950 via-violet-900 to-violet-800 text-xl font-medium rounded-xl shadow-black shadow-xs cursor-pointer flex flex-col align-middle justify-center ">
+                + Google Login
+              </motion.button>
+              <motion.button id="subscribe_key" onClick={(e) => {e.preventDefault(); window.location.href = "https://checkout-2223hqzj3q-uc.a.run.app?user=" + auth.currentUser.uid}} initial={{scale: 1}} whileHover={{scale: 1.1}} whileTap={{scale: 0.9}} transition={{type: "spring", duration: 1}} className="relative w-[10em] h-[50%] m-auto ml-0 mr-0 p-0 bg-linear-45 from-violet-950 via-violet-900 to-violet-800 text-xl font-medium rounded-xl shadow-black shadow-xs cursor-pointer flex flex-col align-middle justify-center ">
+                + Subscribe To Pro
               </motion.button>
             </h1>
           </div>
